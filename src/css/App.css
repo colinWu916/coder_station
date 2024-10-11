@@ -72,9 +72,9 @@
   
   .content {
     width: 1200px;
-    /* height: 5000px; */
     background-color: #fff;
-    margin: 85px auto 0 auto;
+    margin: 0 auto;
+    padding-top: 85px;
   }
   
   .footer {

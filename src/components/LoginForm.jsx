@@ -1,6 +1,8 @@
-import { Modal, Radio, Form, Input, Button, Row, Col, Checkbox } from "antd";
+import { Modal, Radio, Form, Input, Button, Row, Col, Checkbox, message } from "antd";
 import { useState, useRef, useEffect } from "react";
-import { getCaptcha } from "../api/user";
+import { getCaptcha, userIsExist, addUser } from "@/api/user";
+import { initUserInfo, changeLoginStatus } from "@/redux/userSlice";
+import { useDispatch } from "react-redux";
 
 import styles from "../css/LoginForm.module.css";
 
@@ -8,6 +10,7 @@ function LoginForm(props) {
   const [value, setValue] = useState(1);
   const loginFormRef = useRef();
   const registerFormRef = useRef();
+  const dispatch = useDispatch();
 
   // 登录表单的状态数据
   const [loginInfo, setLoginInfo] = useState({
@@ -39,7 +42,37 @@ function LoginForm(props) {
 
   function loginHandle() {}
 
-  function registerHandle() {}
+  function handleCancel() {
+    // 清空上一次的内容
+    setRegisterInfo({
+      loginId: "",
+      nickname: "",
+      captcha: "",
+    });
+    setLoginInfo({
+      loginId: "",
+      loginPwd: "",
+      captcha: "",
+      remember: false,
+    });
+    props.closeModal();
+  }
+
+  async function registerHandle() {
+    const result = await addUser(registerInfo);
+    if (result.data) {
+      message.success("用户注册成功，默认密码为 123456");
+      // 还需要将用户的信息存储到数据仓库里面
+      dispatch(initUserInfo(result.data));
+      // 将数据仓库的登录状态进行修改
+      dispatch(changeLoginStatus(true));
+      // 关闭登录注册的弹出框
+      handleCancel();
+    } else {
+      message.warning(result.msg);
+      captchaClickHandle();
+    }
+  }
 
   /**
    * @param {*} oldInfo 之前整体的状态
@@ -56,6 +89,16 @@ function LoginForm(props) {
   async function captchaClickHandle() {
     const result = await getCaptcha();
     setCaptcha(result);
+  }
+
+  async function checkLoginIdIsExist() {
+    if (registerInfo.loginId) {
+      const { data } = await userIsExist(registerInfo.loginId);
+      if (data) {
+        // 该 loginId 已经注册过了
+        return Promise.reject("该用户已经注册过了");
+      }
+    }
   }
 
   let container = null;
@@ -204,7 +247,7 @@ function LoginForm(props) {
                 message: "请输入账号，仅此项为必填项",
               },
               // 验证用户是否已经存在
-              // { validator: checkLoginIdIsExist },
+              { validator: checkLoginIdIsExist },
             ]}
             validateTrigger="onBlur"
           >

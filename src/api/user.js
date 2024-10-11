@@ -11,3 +11,18 @@ export function getCaptcha() {
   });
 }
 
+export function userIsExist(loginId) {
+  return request({
+    url: `/api/user/userIsExist/${loginId}`,
+    method: "GET"
+  })
+}
+
+export function addUser(newUserInfo) {
+  return request({
+    url: "/api/user",
+    data: newUserInfo,
+    method: "POST"
+  })
+}
+
