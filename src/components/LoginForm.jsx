@@ -1,6 +1,6 @@
 import { Modal, Radio, Form, Input, Button, Row, Col, Checkbox, message } from "antd";
 import { useState, useRef, useEffect } from "react";
-import { getCaptcha, userIsExist, addUser } from "@/api/user";
+import { getCaptcha, userIsExist, addUser, userLogin, getUserById } from "../api/user";
 import { initUserInfo, changeLoginStatus } from "@/redux/userSlice";
 import { useDispatch } from "react-redux";
 
@@ -29,32 +29,108 @@ function LoginForm(props) {
   const [captcha, setCaptcha] = useState(null);
 
   useEffect(() => {
-    captchaClickHandle();
+    // 清空上一次的内容
+    if (props.isShow) {
+      if (loginFormRef.current) {
+        loginFormRef.current.setFieldsValue({
+          loginId: loginInfo.loginId,
+          loginPwd: loginInfo.loginPwd,
+          captcha: "",
+          remember: loginInfo.remember,
+        });
+      }
+      captchaClickHandle();
+    } else {
+      setRegisterInfo({
+        loginId: "",
+        nickname: "",
+        captcha: "",
+      });
+      if (registerFormRef.current) registerFormRef.current.resetFields();
+      if (!loginInfo.remember) {
+        setLoginInfo({
+          loginId: "",
+          loginPwd: "",
+          captcha: "",
+          remember: false,
+        });
+        if (loginFormRef.current) loginFormRef.current.resetFields();
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.isShow]);
 
-  function handleOk() {}
+  function handleOk() {
+    if (value === 1) {
+      loginFormRef.current.validateFields().then(() => {
+        loginHandle();
+      }).catch((errorInfo) => {
+        console.log("校验失败:", errorInfo);
+      });
+    } else {
+      registerFormRef.current.validateFields().then(() => {
+        registerHandle();
+      }).catch((errorInfo) => {
+        console.log("校验失败:", errorInfo);
+      });
+    }
+  }
+
+  function resetInfo() {
+    if(value === 1) loginFormRef.current.resetFields();
+    else registerFormRef.current.resetFields();
+  }
 
   function onChange(e) {
     // 修改 value 的值，达到单选框能够切换
+    debugger
     setValue(e.target.value);
     captchaClickHandle();
+    if (e.target.value === 1) {
+      setTimeout(() => {
+        if (loginFormRef.current) {
+          loginFormRef.current.setFieldsValue({
+            loginId: loginInfo.loginId,
+            loginPwd: loginInfo.loginPwd,
+            captcha: '',
+            remember: loginInfo.remember,
+          });
+        }
+      }, 0)
+    }
   }
 
-  function loginHandle() {}
+  async function loginHandle() {
+    const result = await userLogin(loginInfo);
+    if (result.data) {
+      // 验证码是正确的
+      // 接下来会有这么几种情况 （1）密码不正确 （2）账户被冻结 （3）账户正常，能够正常登录
+      const data = result.data;
+      if (!data.data) {
+        // 账号密码不正确
+        message.error("账号或密码不正确");
+        captchaClickHandle();
+      } else if (!data.data.enabled) {
+        // 账号被禁用了
+        message.warning("账号被禁用");
+        captchaClickHandle();
+      } else {
+        // 说明账号密码正确，能够登录
+        // 存储 token
+        localStorage.userToken = data.token;
+        // 将用户的信息存储到状态仓库，方便后面使用
+        const result = await getUserById(data.data._id);
+        dispatch(initUserInfo(result.data));
+        dispatch(changeLoginStatus(true));
+        handleCancel();
+      }
+    } else {
+      message.warning(result.msg);
+      captchaClickHandle();
+    }
+  }
 
   function handleCancel() {
-    // 清空上一次的内容
-    setRegisterInfo({
-      loginId: "",
-      nickname: "",
-      captcha: "",
-    });
-    setLoginInfo({
-      loginId: "",
-      loginPwd: "",
-      captcha: "",
-      remember: false,
-    });
     props.closeModal();
   }
 
@@ -221,7 +297,7 @@ function LoginForm(props) {
             >
               登录
             </Button>
-            <Button type="primary" htmlType="submit">
+            <Button type="primary" onClick={resetInfo}>
               重置
             </Button>
           </Form.Item>
@@ -240,7 +316,7 @@ function LoginForm(props) {
         >
           <Form.Item
             label="登录账号"
-            name="loginId"
+            name="registerLoginId"
             rules={[
               {
                 required: true,
@@ -328,7 +404,7 @@ function LoginForm(props) {
             >
               注册
             </Button>
-            <Button type="primary" htmlType="submit">
+            <Button type="primary" onClick={resetInfo}>
               重置
             </Button>
           </Form.Item>
@@ -343,7 +419,7 @@ function LoginForm(props) {
         title="注册/登录"
         open={props.isShow}
         onOk={handleOk}
-        onCancel={props.closeModal}
+        onCancel={handleCancel}
       >
         <Radio.Group
           value={value}
