@@ -83,7 +83,6 @@ function LoginForm(props) {
 
   function onChange(e) {
     // 修改 value 的值，达到单选框能够切换
-    debugger
     setValue(e.target.value);
     captchaClickHandle();
     if (e.target.value === 1) {
