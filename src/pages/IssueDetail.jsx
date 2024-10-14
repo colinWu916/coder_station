@@ -8,7 +8,7 @@ import Recommend from "../components/Recommend";
 import { formatDate } from "../utils/tools";
 import { Avatar } from "antd";
 import Discuss from "../components/Discuss";
-
+import { updateIssue } from "../api/issue";
 import styles from "../css/IssueDetail.module.css";
 
 /**
@@ -25,8 +25,12 @@ function IssueDetail(props) {
       setIssueInfo(data);
       const result = await getUserById(data.userId);
       setIssueUser(result.data);
+      updateIssue(data._id, {
+        scanNumber: ++data.scanNumber,
+      });
     }
     fetchData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -41,19 +45,17 @@ function IssueDetail(props) {
             <h1>{issueInfo?.issueTitle}</h1>
             {/* 提问人信息：头像、昵称、提问时间 */}
             <div className={styles.questioner}>
-              <Avatar size="small" src={issueUser?.avatar} />
+              <Avatar size="small" src={ '/assets' + issueUser?.avatar} />
               <span className={styles.user}>{issueUser?.nickname}</span>
               <span>发布于：{formatDate(issueInfo?.issueDate)}</span>
             </div>
             {/* 问题详情 */}
             <div className={styles.content}>
-              <div
-                dangerouslySetInnerHTML={{ __html: issueInfo?.issueContent }}
-              ></div>
+              <div dangerouslySetInnerHTML={{ __html: issueInfo?.issueContent }}></div>
             </div>
           </div>
           {/* 左下方：评论 */}
-          <Discuss commentType={1} targetId={issueInfo?._id} />
+          <Discuss commentType={1} targetId={issueInfo?._id} issueInfo={issueInfo} />
         </div>
         {/* 右侧 */}
         <div className={styles.rightSide}>

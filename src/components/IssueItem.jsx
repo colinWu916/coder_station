@@ -5,6 +5,7 @@ import styles from "../css/IssueItem.module.css";
 import { Tag } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { getUserById } from "../api/user";
+import { useNavigate } from "react-router-dom";
 
 /**
  * 每一条问答的项目
@@ -23,6 +24,9 @@ function IssueItem(props) {
     "red",
     "purple",
   ];
+
+  const navigate = useNavigate();
+
   useEffect(() => {
     if (!typeList.length) {
       // 派发 action 来发送请求，获取到数据填充到状态仓库
@@ -53,7 +57,12 @@ function IssueItem(props) {
       </div>
       {/* 问题内容 */}
       <div className={styles.issueContainer}>
-        <div className={styles.top}>{props.issueInfo.issueTitle}</div>
+        <div 
+          className={styles.top} 
+          onClick={() => navigate(`/issues/${props.issueInfo._id}`)}
+        >
+          {props.issueInfo.issueTitle}
+        </div>
         <div className={styles.bottom}>
           <div className={styles.left}>
             <Tag color={colorArr[typeList.indexOf(type) % colorArr.length]}>

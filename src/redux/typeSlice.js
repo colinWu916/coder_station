@@ -13,10 +13,17 @@ export const getTypeList = createAsyncThunk(
 const typeSlice = createSlice({
   name: "type",
   initialState: {
-    typeList: [], // 存储所有的类型
+    typeList: [],
+    issueTypeId: 'all',
+    bookTypeId: 'all',
   },
   reducers: {
-    // 你可以在这里添加其他的同步 reducers
+    updateStoreIssueTypeId: (state, { payload }) => {
+      state.issueTypeId = payload;
+    },
+    updateStoreBookTypeId: (state, { payload }) => {
+      state.bookTypeId = payload;
+    },
   },
   // 专门处理异步的 reducer
   extraReducers: (builder) => {
@@ -28,4 +35,5 @@ const typeSlice = createSlice({
   }
 });
 
+export const { updateStoreIssueTypeId,updateStoreBookTypeId } = typeSlice.actions;
 export default typeSlice.reducer;

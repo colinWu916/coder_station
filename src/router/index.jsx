@@ -6,6 +6,9 @@ import Books from '../pages/Books';
 import Interviews from '../pages/Interviews';
 import AddIssue from "../pages/AddIssue.jsx";
 import IssueDetail from "../pages/IssueDetail";
+import BookDetail from "../pages/BookDetail.jsx";
+import NotFound from "../pages/NotFound.jsx";
+import SearchPage from "../pages/SearchPage";
 
 function RouteConfig() {
   return (
@@ -13,9 +16,12 @@ function RouteConfig() {
       <Route path='/issues' element={<Issues />}></Route>
       <Route path="/issues/:id" element={<IssueDetail />} />
       <Route path='/books' element={<Books />}></Route>
+      <Route path="/books/:id" element={<BookDetail />} />
       <Route path='/interviews' element={<Interviews />}></Route>
       <Route path="/addIssue" element={<AddIssue />} />
+      <Route path="/searchPage" element={<SearchPage />} />
       <Route path='/' element={<Navigate replace to='/issues' />}></Route>
+      <Route path="*" element={<NotFound />} />
     </Routes>
   )
 }
