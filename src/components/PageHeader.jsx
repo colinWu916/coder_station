@@ -10,6 +10,7 @@ function PageHeader(props) {
     <div className={styles.row}>
       <div className={styles.pageHeader}>{props.title}</div>
       {/* 分类选择 */}
+      {props.children}
     </div>
   );
 }

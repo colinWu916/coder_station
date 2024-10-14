@@ -17,14 +17,14 @@ import {
   getIssueCommentById,
   getBookCommentById,
 } from "../api/comment";
-import { getUserById, editUser } from "../api/user";
+import { getUserById } from "../api/user";
 import { formatDate } from "../utils/tools";
 import { updateIssue } from "../api/issue";
 import { updateBook } from "../api/book";
 import { Editor } from "@toast-ui/react-editor";
 import "@toast-ui/editor/dist/toastui-editor.css";
-// import { updateUserInfoAsync } from "../redux/userSlice";
-// import { useDispatch } from "react-redux";
+import { updateUserInfoAsync } from "../redux/userSlice";
+import { useDispatch } from "react-redux";
 import styles from "../css/Discuss.module.css";
 
 /**
@@ -35,7 +35,7 @@ function Discuss(props) {
   const [value, setValue] = useState("");
   const [commentList, setCommentList] = useState([]);
   const [refresh, setRefresh] = useState(false);
-  // const dispatch = useDispatch();
+  const dispatch = useDispatch();
   const [pageInfo, setPageInfo] = useState({
     current: 1, // 当前是第一页
     pageSize: 10, // 每一页显示 10 条数据
@@ -123,9 +123,12 @@ function Discuss(props) {
           commentNumber: ++props.issueInfo.commentNumber,
         });
         // 增加对应用户的积分
-        editUser(userInfo._id, {
-          points: userInfo.points + 4,
-        });
+        dispatch(
+          updateUserInfoAsync({
+            userId: userInfo._id,
+            newInfo: {points: userInfo.points + 4}
+          })
+        );
         message.success("评论添加成功，积分+4");
         editorRef.current.getInstance().setHTML("");
       } else if (props.commentType === 2) {
@@ -134,9 +137,12 @@ function Discuss(props) {
           commentNumber: ++props.bookInfo.commentNumber,
         });
         // 增加对应用户的积分
-        editUser(userInfo._id, {
-          points: userInfo.points + 2,
-        });
+        dispatch(
+          updateUserInfoAsync({
+            userId: userInfo._id,
+            newInfo: {points: userInfo.points + 2}
+          })
+        );
         message.success("评论添加成功，积分+2");
         setValue("");
       }

@@ -7,7 +7,9 @@ import { getIssueByPage } from "../api/issue";
 import AddIssueBtn from "../components/AddIssueBtn.jsx";
 import Recommend from "../components/Recommend";
 import ScoreRank from "../components/ScoreRank"
+import TypeSelect from "../components/TypeSelect";
 import styles from "../css/Issue.module.css";
+import { useSelector } from "react-redux";
 
 function Issues(props) {
   // 用于存储获取到的状态列表
@@ -19,6 +21,8 @@ function Issues(props) {
     total: 0, // 数据的总条数
   });
 
+  const { issueTypeId } = useSelector(state => state.type);
+
   function handlePageChange(current, pageSize) {
     setPageInfo({
       current,
@@ -28,12 +32,18 @@ function Issues(props) {
 
   useEffect(() => {
     async function fetchData() {
-      // {currentPage: 1, eachPage: 15, count: 21, totalPage: 2, data: Array(15)}
-      const { data } = await getIssueByPage({
+      let searchParams = {
         current: pageInfo.current,
         pageSize: pageInfo.pageSize,
         issueStatus: true,
-      });
+      };
+      if (issueTypeId !== "all") {
+        // 用户点击了分类的，那么就需要根据分类来渲染
+        searchParams.typeId = issueTypeId;
+        // 如果按照分类来进行查询，需要重新将当前页设置为第一页
+        searchParams.current = 1;
+      }
+      const { data } = await getIssueByPage(searchParams);
       setIssueInfo(data.data);
       setPageInfo({
         current: data.currentPage,
@@ -43,7 +53,7 @@ function Issues(props) {
     }
     fetchData();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pageInfo.current, pageInfo.pageSize]);
+  }, [pageInfo.current, pageInfo.pageSize, issueTypeId]);
 
   let issueList = [];
 
@@ -54,7 +64,9 @@ function Issues(props) {
   return (
     <div className={styles.container}>
       {/* 上面的头部 */}
-      <PageHeader title="问答列表" />
+      <PageHeader title="问答列表">
+        <TypeSelect />
+      </PageHeader>
       {/* 下面的列表内容区域 */}
       <div className={styles.issueContainer}>
         {/* 左边区域 */}

@@ -1,7 +1,8 @@
 import { Tag } from "antd";
 import { useSelector, useDispatch } from "react-redux";
 import { getTypeList } from "../redux/typeSlice";
-import { useState, useEffect, useLocation } from "react";
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import {
   updateStoreIssueTypeId,
   updateStoreBookTypeId,

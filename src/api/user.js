@@ -43,20 +43,6 @@ export function editUser(userId, newUserInfo) {
 }
 
 /**
- * 根据用户 id 确认密码是否正确
- */
-
-export function checkPasswordIsRight(userId, loginPwd) {
-  return request("/api/user/passwordcheck", {
-    method: "POST",
-    data: {
-      userId,
-      loginPwd,
-    },
-  });
-}
-
-/**
  * 用户登录
  */
 
@@ -95,6 +81,20 @@ export function getUserByPointsRank(){
   return request({
     url: "/api/user/pointsrank",
     method: "GET"
+  })
+}
+
+/**
+ * 验证用户账号密码是否正确
+ */
+export function checkPassword(userId, loginPwd){
+  return request({
+    url : "/api/user/passwordcheck",
+    method : "POST",
+    data : {
+      userId,
+      loginPwd
+    }
   })
 }
 

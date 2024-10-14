@@ -7,7 +7,7 @@ import NavHeader from "./components/NavHeader";
 import PageFooter from "./components/PageFooter";
 import "./css/App.css";
 
-import RouteConfig from "./router/index"
+import RouteBefore from "./router/RouteBefore"
 import LoginForm from "./components/LoginForm"
 
 const { Header, Footer, Content } = Layout;
@@ -54,7 +54,7 @@ function App() {
         <NavHeader loginHandle={loginHandle} />
       </Header>
       <Content className="content">
-        <RouteConfig />
+        <RouteBefore />
       </Content>
       <Footer className="footer">
         <PageFooter />

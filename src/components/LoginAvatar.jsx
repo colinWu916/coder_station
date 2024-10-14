@@ -15,7 +15,7 @@ function LoginAvatar(props) {
 
   function listClickHandle(item) {
     if (item === "个人中心") {
-      // 跳转到个人中心
+      navigate("/personal");
     } else {
       // 退出登录
       // 清除 token
